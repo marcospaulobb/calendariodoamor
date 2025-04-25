@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 347 100% 92%;
+    --primary-foreground: 355 100% 97%;
+    --secondary: 347 77% 92%;
+    --secondary-foreground: 355 100% 97%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 347 77% 92%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .heart-icon {
+    @apply text-[#ea384c] transition-transform hover:scale-110;
+  }
+
+  .calendar-cell {
+    @apply relative flex h-12 w-12 items-center justify-center rounded-full transition-colors hover:bg-primary/50 sm:h-14 sm:w-14;
+  }
+
+  .calendar-cell.selected {
+    @apply bg-primary;
+  }
+
+  .title-love {
+    font-family: 'Dancing Script', cursive;
+  }
+}
