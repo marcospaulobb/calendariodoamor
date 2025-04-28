@@ -1,73 +1,84 @@
-# Welcome to your Lovable project
+# Calendário do Amor
 
-## Project info
+Um aplicativo web para marcar dias especiais em um calendário, com suporte para múltiplos usuários e persistência de dados usando Supabase.
 
-**URL**: https://lovable.dev/projects/b3bf3a1a-a6be-476e-b124-9d81108c2981
+## Funcionalidades
 
-## How can I edit this code?
+- Marcação de dias no calendário
+- Dias 4 de cada mês destacados em rosa
+- Gráfico de barras mostrando a quantidade de dias marcados por mês
+- Suporte para múltiplos usuários
+- Persistência de dados no Supabase
 
-There are several ways of editing your application.
+## Configuração do Supabase
 
-**Use Lovable**
+1. Crie uma conta no [Supabase](https://supabase.com)
+2. Crie um novo projeto
+3. No SQL Editor, execute o seguinte código para criar a tabela necessária:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b3bf3a1a-a6be-476e-b124-9d81108c2981) and start prompting.
+```sql
+CREATE TABLE calendar_marks (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  date DATE NOT NULL,
+  is_marked BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  UNIQUE(user_id, date)
+);
 
-Changes made via Lovable will be committed automatically to this repo.
+-- Criar índices para melhor performance
+CREATE INDEX idx_calendar_marks_user_id ON calendar_marks(user_id);
+CREATE INDEX idx_calendar_marks_date ON calendar_marks(date);
+```
 
-**Use your preferred IDE**
+4. Copie as credenciais do seu projeto (URL e chave anônima)
+5. Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```
+VITE_SUPABASE_URL=sua_url_do_supabase
+VITE_SUPABASE_ANON_KEY=sua_chave_anonima_do_supabase
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Instalação
 
-Follow these steps:
+```bash
+# Instalar dependências
+npm install
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Iniciar o servidor de desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Hospedagem
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Frontend (Supabase Storage)
 
-**Use GitHub Codespaces**
+1. No painel do Supabase, vá para Storage
+2. Crie um novo bucket chamado "calendario-amor"
+3. Configure as políticas de acesso do bucket
+4. Faça o build do projeto:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm run build
+```
 
-## What technologies are used for this project?
+5. Faça upload dos arquivos da pasta `dist` para o bucket
 
-This project is built with:
+### Banco de Dados
 
-- Vite
-- TypeScript
+O banco de dados já está configurado no Supabase e não requer configuração adicional.
+
+## Tecnologias Utilizadas
+
 - React
-- shadcn-ui
+- TypeScript
+- Vite
+- Supabase
+- date-fns
+- Recharts
 - Tailwind CSS
+- Shadcn UI
 
-## How can I deploy this project?
+## Licença
 
-Simply open [Lovable](https://lovable.dev/projects/b3bf3a1a-a6be-476e-b124-9d81108c2981) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+MIT

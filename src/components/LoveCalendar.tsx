@@ -5,17 +5,34 @@ import { Heart } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import MonthStats from './MonthStats';
 import MonthlyChart from './MonthlyChart';
+import { calendarApi, CalendarMark } from '@/lib/supabase';
+
+// ID do usuário atual (você pode implementar um sistema de autenticação mais robusto depois)
+const CURRENT_USER_ID = 'user1'; // Temporário para teste
 
 const LoveCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDays, setSelectedDays] = useState<Date[]>(() => {
-    const saved = localStorage.getItem('selectedDays');
-    return saved ? JSON.parse(saved).map((d: string) => new Date(d)) : [];
-  });
+  const [selectedDays, setSelectedDays] = useState<Date[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Carregar marcações do Supabase ao iniciar
   useEffect(() => {
-    localStorage.setItem('selectedDays', JSON.stringify(selectedDays));
-  }, [selectedDays]);
+    const loadMarks = async () => {
+      try {
+        const marks = await calendarApi.getMarks(CURRENT_USER_ID);
+        const dates = marks
+          .filter(mark => mark.is_marked)
+          .map(mark => new Date(mark.date));
+        setSelectedDays(dates);
+      } catch (error) {
+        console.error('Erro ao carregar marcações:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMarks();
+  }, []);
 
   const days = eachDayOfInterval({
     start: startOfMonth(currentDate),
@@ -25,14 +42,21 @@ const LoveCalendar = () => {
   const handlePreviousMonth = () => setCurrentDate(subMonths(currentDate, 1));
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
-  const toggleDay = (date: Date) => {
-    setSelectedDays(prev => {
-      const isSelected = prev.some(d => isSameDay(d, date));
+  const toggleDay = async (date: Date) => {
+    try {
+      const isSelected = selectedDays.some(d => isSameDay(d, date));
+      const dateStr = date.toISOString().split('T')[0];
+
       if (isSelected) {
-        return prev.filter(d => !isSameDay(d, date));
+        await calendarApi.deleteMark(CURRENT_USER_ID, dateStr);
+        setSelectedDays(prev => prev.filter(d => !isSameDay(d, date)));
+      } else {
+        await calendarApi.upsertMark(CURRENT_USER_ID, dateStr, true);
+        setSelectedDays(prev => [...prev, date]);
       }
-      return [...prev, date];
-    });
+    } catch (error) {
+      console.error('Erro ao atualizar marcação:', error);
+    }
   };
 
   const isDaySelected = (date: Date) => {
@@ -42,6 +66,10 @@ const LoveCalendar = () => {
   const isSpecialDay = (date: Date) => {
     return date.getDate() === 4;
   };
+
+  if (loading) {
+    return <div className="text-center p-4">Carregando...</div>;
+  }
 
   return (
     <div className="mx-auto max-w-4xl p-4">
