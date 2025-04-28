@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from 'date-fns';
+import React, { useState, useEffect } from 'react';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Heart } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import MonthStats from './MonthStats';
 import MonthlyChart from './MonthlyChart';
 import { calendarApi, CalendarMark } from '@/lib/supabase';
+import './LoveCalendar.css';
 
 // ID do usuário atual (você pode implementar um sistema de autenticação mais robusto depois)
 const CURRENT_USER_ID = 'user1'; // Temporário para teste
 
-const LoveCalendar = () => {
+interface LoveCalendarProps {
+  selectedDates: Date[];
+  onDateSelect: (date: Date) => void;
+}
+
+const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDays, setSelectedDays] = useState<Date[]>([]);
+  const [selectedDays, setSelectedDays] = useState<Date[]>(selectedDates);
   const [loading, setLoading] = useState(true);
 
   // Carregar marcações do Supabase ao iniciar
@@ -34,10 +40,9 @@ const LoveCalendar = () => {
     loadMarks();
   }, []);
 
-  const days = eachDayOfInterval({
-    start: startOfMonth(currentDate),
-    end: endOfMonth(currentDate)
-  });
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const handlePreviousMonth = () => setCurrentDate(subMonths(currentDate, 1));
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
@@ -59,8 +64,8 @@ const LoveCalendar = () => {
     }
   };
 
-  const isDaySelected = (date: Date) => {
-    return selectedDays.some(d => isSameDay(d, date));
+  const isDateSelected = (date: Date) => {
+    return selectedDays.some(selectedDate => isSameDay(selectedDate, date));
   };
 
   const isSpecialDay = (date: Date) => {
@@ -116,18 +121,19 @@ const LoveCalendar = () => {
             <div key={`empty-${i}`} className="calendar-cell invisible" />
           ))}
           
-          {days.map(day => (
+          {daysInMonth.map(day => (
             <button
               key={day.toString()}
               onClick={() => toggleDay(day)}
               className={`calendar-cell 
-                ${isDaySelected(day) ? 'selected' : ''} 
+                ${isDateSelected(day) ? 'selected' : ''} 
                 ${isSpecialDay(day) ? 'bg-[#FFDEE2]' : ''} 
+                ${isToday(day) ? 'bg-gray-100' : ''}
                 border border-gray-200`}
               disabled={!isSameMonth(day, currentDate)}
             >
               <span className="z-10 relative">{format(day, 'd')}</span>
-              {isDaySelected(day) && (
+              {isDateSelected(day) && (
                 <Heart 
                   className="absolute text-red-600" 
                   size={24} 
