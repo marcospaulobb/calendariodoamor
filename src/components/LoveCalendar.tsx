@@ -114,7 +114,7 @@ const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect
               className={`calendar-cell 
                 ${isDateSelected(day) ? 'selected' : ''} 
                 ${isSpecialDay(day) ? 'bg-[#FFDEE2]' : ''} 
-                ${isToday(day) ? 'bg-gray-100' : ''}
+                ${isToday(day) ? 'bg-gray-300' : ''}
                 border border-gray-200`}
               disabled={!isSameMonth(day, currentDate)}
             >
