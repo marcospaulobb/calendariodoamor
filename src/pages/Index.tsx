@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import LoveCalendar from "@/components/LoveCalendar";
 import { calendarApi } from "@/lib/supabase";
+import { isSameDay } from "date-fns";
 
 // ID do usuário atual (você pode implementar um sistema de autenticação mais robusto depois)
 const CURRENT_USER_ID = 'user1'; // Temporário para teste
@@ -32,12 +33,12 @@ const Index = () => {
 
   const handleDateSelect = async (date: Date) => {
     try {
-      const isSelected = selectedDates.some(d => d.getTime() === date.getTime());
+      const isSelected = selectedDates.some(d => isSameDay(d, date));
       const dateStr = date.toISOString().split('T')[0];
 
       if (isSelected) {
         await calendarApi.deleteMark(CURRENT_USER_ID, dateStr);
-        setSelectedDates(prev => prev.filter(d => d.getTime() !== date.getTime()));
+        setSelectedDates(prev => prev.filter(d => !isSameDay(d, date)));
       } else {
         await calendarApi.upsertMark(CURRENT_USER_ID, dateStr, true);
         setSelectedDates(prev => [...prev, date]);
