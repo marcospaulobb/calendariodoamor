@@ -18,7 +18,6 @@ interface LoveCalendarProps {
 
 const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDays, setSelectedDays] = useState<Date[]>(selectedDates);
   const [loading, setLoading] = useState(true);
 
   // Carregar marcações do Supabase ao iniciar
@@ -29,7 +28,7 @@ const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect
         const dates = marks
           .filter(mark => mark.is_marked)
           .map(mark => new Date(mark.date));
-        setSelectedDays(dates);
+        // Não precisamos mais definir selectedDays aqui, pois estamos usando selectedDates das props
       } catch (error) {
         console.error('Erro ao carregar marcações:', error);
       } finally {
@@ -47,25 +46,12 @@ const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect
   const handlePreviousMonth = () => setCurrentDate(subMonths(currentDate, 1));
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
-  const toggleDay = async (date: Date) => {
-    try {
-      const isSelected = selectedDays.some(d => isSameDay(d, date));
-      const dateStr = date.toISOString().split('T')[0];
-
-      if (isSelected) {
-        await calendarApi.deleteMark(CURRENT_USER_ID, dateStr);
-        setSelectedDays(prev => prev.filter(d => !isSameDay(d, date)));
-      } else {
-        await calendarApi.upsertMark(CURRENT_USER_ID, dateStr, true);
-        setSelectedDays(prev => [...prev, date]);
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar marcação:', error);
-    }
+  const handleDayClick = (date: Date) => {
+    onDateSelect(date);
   };
 
   const isDateSelected = (date: Date) => {
-    return selectedDays.some(selectedDate => isSameDay(selectedDate, date));
+    return selectedDates.some(selectedDate => isSameDay(selectedDate, date));
   };
 
   const isSpecialDay = (date: Date) => {
@@ -85,7 +71,7 @@ const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect
       <Card className="mb-8 p-6">
         <MonthStats 
           currentDate={currentDate} 
-          selectedDays={selectedDays}
+          selectedDays={selectedDates}
         />
       </Card>
 
@@ -124,7 +110,7 @@ const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect
           {daysInMonth.map(day => (
             <button
               key={day.toString()}
-              onClick={() => toggleDay(day)}
+              onClick={() => handleDayClick(day)}
               className={`calendar-cell 
                 ${isDateSelected(day) ? 'selected' : ''} 
                 ${isSpecialDay(day) ? 'bg-[#FFDEE2]' : ''} 
@@ -146,7 +132,7 @@ const LoveCalendar: React.FC<LoveCalendarProps> = ({ selectedDates, onDateSelect
       </Card>
 
       <Card className="p-6">
-        <MonthlyChart selectedDays={selectedDays} />
+        <MonthlyChart selectedDays={selectedDates} />
       </Card>
     </div>
   );
