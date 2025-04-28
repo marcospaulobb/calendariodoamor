@@ -5,6 +5,7 @@ import { calendarApi } from "@/lib/supabase";
 // ID do usuário atual (você pode implementar um sistema de autenticação mais robusto depois)
 const CURRENT_USER_ID = 'user1'; // Temporário para teste
 
+// Componente principal da aplicação
 const Index = () => {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [loading, setLoading] = useState(true);
